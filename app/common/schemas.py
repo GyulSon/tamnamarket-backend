@@ -6,8 +6,9 @@ T = TypeVar("T")
 class BaseResponse(BaseModel, Generic[T]):
     """
     모든 API 응답의 표준 형식
-    isSuccess: 성공 여부 (True/False)
-    content: 실제 데이터 (실패 시 None)
+    - 성공 시: isSuccess=True, content에 데이터 포함
+    - 실패 시: isSuccess=False, message에 에러 이유 기재
     """
     isSuccess: bool
+    message: Optional[str] = None
     content: Optional[T] = None

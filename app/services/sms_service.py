@@ -14,17 +14,40 @@ class SMSService:
 
     def send_order_notification(self, phone: str, product_name: str):
         """
-        [6단계 구현] 구매 발생 시 판매자에게 알림 문자 발송 (Mock)
+        [6단계 구현] 구매 발생 시 판매자에게 알림 문자 발송 (Twilio 연동)
         """
+        import httpx
+        import base64
+
         message = f"[{settings.PROJECT_NAME}] 새 주문이 발생했습니다! 상품: {product_name}"
         
-        # 실제 API 연동이 되어있지 않으므로 로그로 대체
-        print(f"\n[SMS 전송 시뮬레이션]")
-        print(f"수신번호: {phone}")
-        print(f"내용: {message}")
-        print("========================\n")
+        # 번호 포맷팅 (010-xxxx-xxxx -> +8210xxxxxxxx)
+        clean_phone = "".join(filter(str.isdigit, phone))
+        if clean_phone.startswith("0"):
+            clean_phone = "+82" + clean_phone[1:]
         
-        return True
+        # 트윌리오 API 호출
+        url = f"https://api.twilio.com/2010-04-01/Accounts/{settings.TWILIO_ACCOUNT_SID}/Messages.json"
+        auth = (settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        
+        data = {
+            "To": clean_phone,
+            "From": settings.TWILIO_FROM_NUMBER,
+            "Body": message
+        }
+
+        try:
+            with httpx.Client() as client:
+                response = client.post(url, data=data, auth=auth)
+                if response.status_code == 201:
+                    print(f"SMS 발송 성공: {phone}")
+                    return True
+                else:
+                    print(f"SMS 발송 실패: {response.status_code}, {response.text}")
+                    return False
+        except Exception as e:
+            print(f"SMS 발송 중 예외 발생: {e}")
+            return False
 
 # 싱글톤 인스턴스
 sms_service = SMSService()

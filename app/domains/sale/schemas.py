@@ -2,12 +2,15 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import date
 
-class ClassificationResult(BaseModel):
+class ClassificationResultDetail(BaseModel):
+    product_id: int
     category: str
+
+class SaleImageUploadRequest(BaseModel):
+    product_id: int
 
 class SaleAdCreateRequest(BaseModel):
     product_id: int
-    voice_text: str
 
 class GeneratedAdText(BaseModel):
     title: str
@@ -17,6 +20,7 @@ class PriceRecommendRequest(BaseModel):
     product_id: int
 
 class PriceRecommendResponse(BaseModel):
+    product_id: int
     recommended_price: int
 
 class SaleAdDetail(BaseModel):

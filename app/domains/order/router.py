@@ -27,9 +27,9 @@ async def purchase_product(
         db.commit()
         db.refresh(new_order)
         
-        # 판매자에게 SMS 알림 발송 (Mock)
+        # 판매자에게 실제 SMS 알림 발송 (Twilio)
         sms_service.send_order_notification(
-            phone="010-1234-5678", 
+            phone="010-4872-3270", 
             product_name=f"상품 ID {order_data.product_id}"
         )
         
