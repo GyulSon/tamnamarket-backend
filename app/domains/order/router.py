@@ -1,10 +1,16 @@
 from fastapi import APIRouter
 
+from app.common.schemas import BaseResponse
+from app.domains.order.schemas import OrderCreate, OrderResponseInfo
+
 router = APIRouter()
 
-@router.post("/product")
-async def purchase_product():
+@router.post("/product", response_model=BaseResponse[OrderResponseInfo])
+async def purchase_product(order_data: OrderCreate):
     """
     농산물 구매 API
     """
-    return {"message": "구매 절차가 완료되었습니다."}
+    return BaseResponse(
+        isSuccess=True, 
+        content=OrderResponseInfo(order_id=101, status="결제 대기")
+    )

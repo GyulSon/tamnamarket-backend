@@ -1,10 +1,16 @@
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, UploadFile, Body
+from typing import List
 import uuid
 import os
 
+from app.common.schemas import BaseResponse
+from app.domains.sale.schemas import (
+    ClassificationResult, GeneratedAdText, PriceRecommendResponse, SaleAdDetail
+)
+
 router = APIRouter()
 
-@router.post("/classification")
+@router.post("/classification", response_model=BaseResponse[ClassificationResult])
 async def analyze_image(file: UploadFile = File(...)):
     """
     품종 분석 API
@@ -16,32 +22,54 @@ async def analyze_image(file: UploadFile = File(...)):
         content = await file.read()
         buffer.write(content)
         
-    return {"result": "감귤 품종 분석 테스트 성공", "image_url": f"/static/images/{filename}"}
+    return BaseResponse(
+        isSuccess=True, 
+        content=ClassificationResult(category="감귤 테스트 결과")
+    )
 
-@router.post("/image")
-async def upload_product_image(file: UploadFile = File(...)):
+@router.post("/image", response_model=BaseResponse[None])
+async def upload_product_image(files: List[UploadFile] = File(...)):
     """
-    상품 사진 업로드 API
+    상품 사진 업로드 API (최대 3장)
     """
-    return {"message": "상품 사진 업로드 성공"}
+    return BaseResponse(isSuccess=True, content=None)
 
-@router.post("/text")
-async def create_sale_text():
+@router.post("/text", response_model=BaseResponse[GeneratedAdText])
+async def create_sale_text(
+    product_id: int = Body(...),
+    voices: List[UploadFile] = File(...)
+):
     """
-    음성 기반 게시물 작성 AI API
+    음성 기반 게시물 작성 AI API (4개 파일 중 3개 분석, 1개 저장)
     """
-    return {"message": "AI 판매글 작성 성공"}
+    return BaseResponse(
+        isSuccess=True, 
+        content=GeneratedAdText(title="추천 제목", final_description="AI가 작성한 상세 내용")
+    )
 
-@router.post("/price")
-async def recommend_price():
+@router.post("/price", response_model=BaseResponse[PriceRecommendResponse])
+async def recommend_price(product_id: int = Body(..., embed=True)):
     """
     적정가 추천 API
     """
-    return {"message": "적정 가격 추천 성공"}
+    return BaseResponse(
+        isSuccess=True, 
+        content=PriceRecommendResponse(recommended_price=15000)
+    )
 
-@router.get("/salead")
-async def get_sale_detail():
+@router.get("/salead", response_model=BaseResponse[SaleAdDetail])
+async def get_sale_detail(product_id: int):
     """
     판매 글 상세 조회 API
     """
-    return {"message": "판매 글 상세 데이터"}
+    return BaseResponse(
+        isSuccess=True,
+        content=SaleAdDetail(
+            product_id=product_id,
+            title="테스트 상품",
+            price=15000,
+            images=["/static/images/test1.jpg"],
+            voice_url="/static/audio/test.webm",
+            final_description="상세 설명입니다."
+        )
+    )
