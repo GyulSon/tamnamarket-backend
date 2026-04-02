@@ -87,6 +87,13 @@ spec:
           value: "tamnamarket"
         ports:
         - containerPort: 3306
+        volumeMounts:
+        - name: mysql-init-scripts
+          mountPath: /docker-entrypoint-initdb.d/
+      volumes:
+      - name: mysql-init-scripts
+        configMap:
+          name: mysql-init-scripts
 ---
 apiVersion: v1
 kind: Service

@@ -11,6 +11,9 @@ configMapGenerator:
   - name: backend-config
     files:
       - config.json=config/backend-config.json
+  - name: mysql-init-scripts
+    files:
+      - init.sql
 
 generatorOptions:
   disableNameSuffixHash: true
