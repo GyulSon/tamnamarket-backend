@@ -20,7 +20,17 @@ spec:
         - -c
         - |
           echo "MySQL 준비 대기 중..."
-          until mysqladmin ping -h mysql-service -u root -ppassword --silent; do
+          until python3 -c "
+import pymysql, sys
+try:
+    conn = pymysql.connect(host='mysql-service', user='root', password='password', database='tamnamarket', connect_timeout=3)
+    conn.close()
+    print('MySQL 연결 성공')
+    sys.exit(0)
+except Exception as e:
+    print(f'연결 실패: {e}')
+    sys.exit(1)
+"; do
             echo "MySQL 아직 준비 안됨, 3초 후 재시도..."
             sleep 3
           done
