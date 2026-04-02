@@ -17,9 +17,9 @@ if config.config_file_name is not None:
 from app.core.config import settings
 from app.core.database import Base
 # Import all models here for 'autogenerate' support
-# from app.domains.items.models import Item
-# from app.domains.audio.models import Audio
-# from app.domains.sales.models import Sale
+from app.domains.users.models import Seller, SellerImage, Buyer
+from app.domains.items.models import Product, ProductImage
+from app.domains.sales.models import Subscription, Wishlist, Order
 
 target_metadata = Base.metadata
 
