@@ -10,3 +10,11 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+# DB 세션 의존성 주입 도우미
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

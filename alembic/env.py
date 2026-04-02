@@ -18,8 +18,9 @@ from app.core.config import settings
 from app.core.database import Base
 # Import all models here for 'autogenerate' support
 from app.domains.users.models import Seller, SellerImage, Buyer
-from app.domains.items.models import Product, ProductImage
-from app.domains.sales.models import Subscription, Wishlist, Order
+from app.domains.sale.models import Product, ProductImage, Wishlist
+from app.domains.order.models import Order
+from app.domains.subscription.models import Subscription
 
 target_metadata = Base.metadata
 

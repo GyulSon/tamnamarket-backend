@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Boolean, Date, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from app.core.database import Base
 
 class Product(Base):
@@ -35,3 +36,15 @@ class ProductImage(Base):
     img4 = Column(String(255))
 
     product = relationship("Product", back_populates="images")
+
+class Wishlist(Base):
+    __tablename__ = "wishlists"
+
+    wishlist_id = Column(Integer, primary_key=True, autoincrement=True)
+    product_id = Column(Integer, ForeignKey("products.product_id", ondelete="CASCADE"), nullable=False)
+    buyer_id = Column(Integer, ForeignKey("buyers.buyer_id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    product = relationship("Product", back_populates="in_wishlists")
+    buyer = relationship("Buyer", back_populates="wishlists")
