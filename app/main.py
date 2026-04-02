@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.domains.items.router import router as items_router
 from app.domains.audio.router import router as audio_router
 from app.domains.sales.router import router as sales_router
+from app.domains.vision.router import router as vision_router
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -28,6 +29,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(items_router, prefix=f"{settings.API_V1_STR}/items", tags=["Items - 기능 1, 4"])
 app.include_router(audio_router, prefix=f"{settings.API_V1_STR}/audio", tags=["Audio - 기능 2, 3"])
 app.include_router(sales_router, prefix=f"{settings.API_V1_STR}/sales", tags=["Sales - 기능 5, 6"])
+app.include_router(vision_router, prefix="/api/sale", tags=["Vision - 이미지 분석 분기"])
 
 @app.get("/")
 def check_health():
