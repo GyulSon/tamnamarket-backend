@@ -20,7 +20,30 @@ spec:
 
         env:
         - name: DATABASE_URL
-          value: "mysql+pymysql://root:password@mysql-service:3306/tamnamarket"
+          valueFrom:
+            secretKeyRef:
+              name: tamnamarket-secret
+              key: DATABASE_URL
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tamnamarket-secret
+              key: GEMINI_API_KEY
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tamnamarket-secret
+              key: OPENAI_API_KEY
+        - name: CLOVA_INVOKE_URL
+          valueFrom:
+            secretKeyRef:
+              name: tamnamarket-secret
+              key: CLOVA_INVOKE_URL
+        - name: CLOVA_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tamnamarket-secret
+              key: CLOVA_SECRET_KEY
         volumeMounts:
         - name: config-volume
           mountPath: /app/config
