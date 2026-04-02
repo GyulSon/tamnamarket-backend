@@ -5,11 +5,11 @@ import os
 
 from app.core.config import settings
 
-# SQLAlchemy relationship 문자열 resolve를 위해 모든 모델을 라우터보다 먼저 임포트
-from app.domains.users.models import Seller, SellerImage, Buyer  # noqa: F401
-from app.domains.sale.models import Product, ProductImage, Wishlist  # noqa: F401
-from app.domains.subscription.models import Subscription  # noqa: F401
-from app.domains.order.models import Order  # noqa: F401
+# SQLAlchemy relationship 해석을 위해 모든 모델을 라우터보다 먼저 임포트
+from app.domains.users.models import Seller, SellerImage, Buyer
+from app.domains.sale.models import Product, ProductImage, Wishlist
+from app.domains.subscription.models import Subscription
+from app.domains.order.models import Order
 
 from app.domains.sale.router import router as sale_router
 from app.domains.mainscreen.router import router as mainscreen_router
