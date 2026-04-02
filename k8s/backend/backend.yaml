@@ -14,7 +14,7 @@ spec:
     spec:
       initContainers:
       - name: alembic-migrate
-        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/backend:build-22
+        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/backend:build-23
         command:
         - sh
         - -c
@@ -35,7 +35,7 @@ spec:
               key: DATABASE_URL
       containers:
       - name: backend
-        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/backend:build-22
+        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/backend:build-23
         ports:
         - containerPort: 8080
 
