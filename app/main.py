@@ -14,7 +14,10 @@ app = FastAPI(title=settings.PROJECT_NAME)
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://goormthon-3.goorm.training",  # 프론트엔드 배포 주소 (확인 필요)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
