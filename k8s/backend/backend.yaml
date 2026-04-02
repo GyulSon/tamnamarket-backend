@@ -12,37 +12,6 @@ spec:
       labels:
         app: backend
     spec:
-      initContainers:
-      - name: alembic-migrate
-        image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/backend:build-24
-        command:
-        - sh
-        - -c
-        - |
-          echo "MySQL 준비 대기 중..."
-          until python3 -c "
-import pymysql, sys
-try:
-    conn = pymysql.connect(host='mysql-service', user='root', password='password', database='tamnamarket', connect_timeout=3)
-    conn.close()
-    print('MySQL 연결 성공')
-    sys.exit(0)
-except Exception as e:
-    print(f'연결 실패: {e}')
-    sys.exit(1)
-"; do
-            echo "MySQL 아직 준비 안됨, 3초 후 재시도..."
-            sleep 3
-          done
-          echo "MySQL 준비 완료. Alembic 마이그레이션 시작..."
-          alembic upgrade head
-          echo "마이그레이션 완료."
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: tamnamarket-secret
-              key: DATABASE_URL
       containers:
       - name: backend
         image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/backend:build-24
