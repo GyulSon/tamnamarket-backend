@@ -5,6 +5,8 @@ import os
 from typing import List, Optional
 from app.core.config import settings
 
+from app.common.constants import ALLOWED_CATEGORIES
+
 class AIService:
     def __init__(self):
         # 제준님의 API 키를 사용하여 클라이언트 초기화
@@ -16,9 +18,10 @@ class AIService:
         """
         try:
             img = Image.open(image_path)
+            categories_str = ", ".join([f"'{c}'" for c in ALLOWED_CATEGORIES])
             prompt = (
-                "너는 제주도 농산물 판별 전문가야. 이 사진 속의 제주 특산물(감귤류, 고사리, 땅콩, 당근)을 분류해줘. "
-                "결과는 반드시 '한라봉', '천혜향', '레드향', '감귤', '고사리', '땅콩', '당근' 중 하나로만 대답해. "
+                f"너는 제주도 농산물 판별 전문가야. 사진 속의 제주 특산물을 분류해줘.\n"
+                f"결과는 반드시 {categories_str} 중 하나로만 대답해.\n"
                 "설명 없이 단어만 출력해."
             )
             response = self.client.models.generate_content(

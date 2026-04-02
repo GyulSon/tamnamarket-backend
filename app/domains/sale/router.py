@@ -13,6 +13,8 @@ from app.domains.sale.schemas import (
 from app.services.ai_service import ai_service
 from app.services.stt_service import stt_service
 
+from app.common.constants import ALLOWED_CATEGORIES
+
 router = APIRouter()
 
 @router.post("/classification", response_model=BaseResponse[ClassificationResult])
@@ -32,8 +34,10 @@ async def analyze_image(
         
     category_result = ai_service.classify_product(file_path)
     
-    # [DB 저장] 실제 서비스에서는 상품을 새로 생성하거나 기존 ID의 품종을 업데이트
-    # 현재는 목업 데이터베이스 흐름에 맞춰 로직 구현
+    # [검증] 7종 품종에 해당하지 않는 경우 실패 반환
+    if category_result not in ALLOWED_CATEGORIES:
+        return BaseResponse(isSuccess=False, content=None)
+        
     return BaseResponse(
         isSuccess=True, 
         content=ClassificationResult(category=category_result)
