@@ -16,7 +16,7 @@ spec:
       - name: backend
         image: 837126493345.dkr.ecr.ap-northeast-2.amazonaws.com/goormthon-3/backend:build-14
         ports:
-        - containerPort: 8080
+        - containerPort: 5000
         volumeMounts:
         - name: config-volume
           mountPath: /app/config
@@ -35,4 +35,4 @@ spec:
     app: backend
   ports:
   - port: 80
-    targetPort: 8080
+    targetPort: 5000
