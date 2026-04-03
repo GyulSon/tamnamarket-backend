@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.formparsers import MultiPartParser
 import os
+
+# multipart 업로드 용량 제한 해제 (기본값 1MB → 사실상 무제한)
+MultiPartParser.max_file_size = 1024 * 1024 * 1024 * 1024  # 1TB
 
 from app.core.config import settings
 
@@ -17,7 +21,9 @@ from app.domains.subscription.router import router as subscription_router
 from app.domains.farmer.router import router as farmer_router
 from app.domains.order.router import router as order_router
 
-app = FastAPI(title=settings.PROJECT_NAME)
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+)
 
 # CORS 설정
 app.add_middleware(

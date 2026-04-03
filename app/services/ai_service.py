@@ -36,17 +36,22 @@ class AIService:
             print(f"AI 분석 중 에러 발생: {e}")
             return "분류 에러"
 
-    def generate_ad_text(self, category: str, stt_texts: List[str]) -> tuple:
+    def generate_ad_text(self, category: str, weight: str, harvest_date: str, taste: str, message: str) -> tuple:
         """
-        4단계: AI 판매글 초안 작성
+        3단계: 4가지 답변을 바탕으로 전문적인 판매글 생성
         """
         try:
-            combined_context = "\n".join(stt_texts)
             prompt = (
-                f"너는 제주도 직거래 플랫폼의 전문 마케터야. 아래 품종과 농부의 설명을 바탕으로 "
-                f"소비자의 마음을 흔드는 제목과 상세 판매글 상세 내용을 작성해줘.\n\n"
-                f"품종: {category}\n"
-                f"농부의 설명 요약:\n{combined_context}\n\n"
+                f"너는 제주도 농산물 직거래 플랫폼의 전문 마케터야. 아래 농부의 답변을 바탕으로 "
+                f"신뢰감 있고 구매 욕구를 자극하는 판매글을 작성해줘.\n\n"
+                f"1. 품종: {category}\n"
+                f"2. 무게: {weight}\n"
+                f"3. 수확일: {harvest_date}\n"
+                f"4. 맛의 특징: {taste}\n"
+                f"5. 농부의 한마디: {message}\n\n"
+                f"### 작성 가이드:\n"
+                f"- 제목은 반드시 '[품종] [무게]' 형식을 포함해야 해. (예: 제주 감귤 5kg, 산지 직송 햇사과 10kg)\n"
+                f"- 내용은 수확일과 맛의 특징을 강조하며, 농부의 진심이 느껴지도록 작성해줘.\n\n"
                 f"제목: [여기에 제목]\n"
                 f"내용: [여기에 상세 내용]"
             )
@@ -55,7 +60,7 @@ class AIService:
                 contents=prompt
             )
             full_text = response.text.strip()
-            title = "신선한 제주 농산물"
+            title = f"제주 {category} {weight}"
             description = full_text
             if "제목:" in full_text and "내용:" in full_text:
                 parts = full_text.split("내용:")
@@ -63,7 +68,7 @@ class AIService:
                 description = parts[1].strip()
             return title, description
         except Exception as e:
-            return "상품 판매합니다", "맛있는 농산물입니다."
+            return f"제주 {category} {weight}", "맛있는 농산물입니다."
 
     def recommend_price(self, category: str, description: Optional[str] = "") -> int:
         """

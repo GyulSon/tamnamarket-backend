@@ -111,7 +111,7 @@ async def create_sale_text(
     """
     3단계: 음성 처리 및 AI 판매글 생성 + DB 업데이트
     """
-    stt_results = []
+    stt_answers = ["", "", "", ""]
     voice_url = ""
 
     try:
@@ -122,16 +122,27 @@ async def create_sale_text(
                 content = await voice.read()
                 buffer.write(content)
             
-            if i < 3: # 분석용
-                raw, translated = stt_service.transcribe_and_translate(temp_path)
-                if translated: stt_results.append(translated)
-            else: # 4번 파일: 원본 저장용
+            # STT & 번역 실행 (모든 음성 파일에 대해)
+            raw, translated = stt_service.transcribe_and_translate(temp_path)
+            if translated:
+                stt_answers[i] = translated
+            
+            if i == 3: # 4번 파일: 구매자에게 하고 싶은 말 (원본 음성 저장용)
                 voice_url = f"/static/audio/{temp_filename}"
 
-        # AI 판매글 생성
+        # AI 판매글 생성 (각 항목을 개별적으로 넘김)
         product = db.query(Product).filter(Product.product_id == product_id).first()
         category = product.category if product else "제주 농산물"
-        title, description = ai_service.generate_ad_text(category=category, stt_texts=stt_results)
+        
+        # 질문 순서에 따른 데이터 매칭
+        # 0:무게, 1:수확일, 2:맛, 3:메시지
+        title, description = ai_service.generate_ad_text(
+            category=category,
+            weight=stt_answers[0] or "무게 정보 없음",
+            harvest_date=stt_answers[1] or "최근 수확",
+            taste=stt_answers[2] or "뛰어난 맛",
+            message=stt_answers[3] or "전달 사항 없음"
+        )
 
         # [DB 저장]
         if product:
