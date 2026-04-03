@@ -115,27 +115,46 @@ async def create_sale_text(
     voice_url = ""
 
     try:
-        for i, voice in enumerate(voices[:4]):
-            temp_filename = f"{uuid.uuid4()}_{voice.filename}"
-            temp_path = os.path.join("static/audio", temp_filename)
-            with open(temp_path, "wb") as buffer:
-                content = await voice.read()
-                buffer.write(content)
-            
-            # STT & 번역 실행 (모든 음성 파일에 대해)
-            raw, translated = stt_service.transcribe_and_translate(temp_path)
-            if translated:
-                stt_answers[i] = translated
-            
-            if i == 3: # 4번 파일: 구매자에게 하고 싶은 말 (원본 음성 저장용)
-                voice_url = f"/static/audio/{temp_filename}"
-
-        # AI 판매글 생성 (각 항목을 개별적으로 넘김)
+        # [1] 상품 존재 여부 선체크
         product = db.query(Product).filter(Product.product_id == product_id).first()
-        category = product.category if product else "제주 농산물"
+        if not product:
+            print(f"❌ [에러] 상품 ID {product_id}를 찾을 수 없습니다.")
+            return BaseResponse(isSuccess=False, message="상품을 찾을 수 없습니다.", content=None)
+
+        print(f"🎙️ [시작] 상품 {product_id} 음성 처리 중... (파일 개수: {len(voices)})")
         
-        # 질문 순서에 따른 데이터 매칭
-        # 0:무게, 1:수확일, 2:맛, 3:메시지
+        for i, voice in enumerate(voices[:4]):
+            try:
+                temp_filename = f"{uuid.uuid4()}_{voice.filename}"
+                temp_path = os.path.join("static/audio", temp_filename)
+                
+                # 디렉토리 다시 한 번 체크 (안전빵)
+                if not os.path.exists("static/audio"):
+                    os.makedirs("static/audio")
+
+                with open(temp_path, "wb") as buffer:
+                    content = await voice.read()
+                    buffer.write(content)
+                
+                print(f"   - {i+1}번 파일 저장 성공: {temp_path}")
+
+                # STT & 번역 실행
+                raw, translated = stt_service.transcribe_and_translate(temp_path)
+                if translated:
+                    stt_answers[i] = translated
+                    print(f"   - {i+1}번 번역 결과: {translated}")
+                else:
+                    print(f"   - ⚠️ {i+1}번 번역 실패 (STT 결과 없음)")
+                
+                if i == 3 or (i == len(voices)-1): # 마지막 파일 또는 4번 파일을 대표 음성으로 함
+                    voice_url = f"/static/audio/{temp_filename}"
+            except Exception as file_err:
+                print(f"   - ❌ {i+1}번 파일 처리 중 개별 에러: {file_err}")
+
+        # [2] AI 판매글 생성
+        category = product.category if product else "제주 농산물"
+        print(f"✍️ [AI 생성 중] 카테고리: {category}")
+
         title, description = ai_service.generate_ad_text(
             category=category,
             weight=stt_answers[0] or "무게 정보 없음",
@@ -144,17 +163,25 @@ async def create_sale_text(
             message=stt_answers[3] or "전달 사항 없음"
         )
 
-        # [DB 저장]
-        if product:
-            product.title = title
-            product.final_description = description
-            product.voice_path = voice_url
-            db.commit()
+        print(f"✅ [완료] 제목 생성 결과: {title}")
+
+        # [3] DB 업데이트
+        product.title = title
+        product.final_description = description
+        product.voice_path = voice_url
+        db.commit()
 
         return BaseResponse(
             isSuccess=True, 
             content=GeneratedAdText(title=title, final_description=description)
         )
+
+    except Exception as e:
+        db.rollback()
+        import traceback
+        print(f"🔥 [CRITICAL 에러] /api/sale/text 처리 도중 전체 실패: {e}")
+        traceback.print_exc() # 상세 에러 스택 파악용
+        return BaseResponse(isSuccess=False, message=str(e), content=None)
 
     except Exception as e:
         db.rollback()

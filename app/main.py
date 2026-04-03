@@ -37,9 +37,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 스태틱 파일 설정 (이미지 저장 등)
-if not os.path.exists("static/images"):
-    os.makedirs("static/images")
+# 스태틱 파일 설정 (이미지, 오디오 등)
+for path in ["static/images", "static/audio"]:
+    if not os.path.exists(path):
+        os.makedirs(path)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # 라우터 등록 (API 명세서 기준)
