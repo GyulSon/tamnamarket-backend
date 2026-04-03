@@ -4,8 +4,12 @@ from typing import List
 
 from app.common.schemas import BaseResponse
 from app.core.database import get_db
+from app.domains.users.models import Seller
+from app.domains.mainscreen.schemas import MainContentItem
 from app.domains.sale.models import Product, ProductImage
 from app.common.utils import get_base64_encoded_file
+
+router = APIRouter()
 
 @router.get("/content", response_model=BaseResponse[List[MainContentItem]])
 async def get_main_content(
