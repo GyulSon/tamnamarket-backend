@@ -27,6 +27,11 @@ class SMSService:
             clean_phone = "+82" + clean_phone[1:]
         
         # 트윌리오 API 호출
+        # 환경변수 미설정 시 안전하게 실패 처리
+        if not settings.TWILIO_ACCOUNT_SID or not settings.TWILIO_AUTH_TOKEN:
+            print("SMS 발송 실패: TWILIO 환경변수가 설정되지 않았습니다.")
+            return False
+
         url = f"https://api.twilio.com/2010-04-01/Accounts/{settings.TWILIO_ACCOUNT_SID}/Messages.json"
         auth = (settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
         
