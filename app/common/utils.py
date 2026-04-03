@@ -10,6 +10,7 @@ def get_base64_encoded_file(file_path: str) -> str:
         # 실제 로컬 경로로 변환 (DB에는 /static/... 로 저장됨)
         true_path = file_path.lstrip("/")
         if not os.path.exists(true_path):
+            print(f"⚠️ [파일 없음] 경로를 찾을 수 없습니다: {true_path} (현재 디렉토리: {os.getcwd()})")
             return ""
             
         with open(true_path, "rb") as f:

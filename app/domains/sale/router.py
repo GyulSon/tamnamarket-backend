@@ -169,6 +169,7 @@ async def create_sale_text(
         product.title = title[:250] if title else f"제주 {category} 상품"
         product.final_description = description
         product.voice_path = voice_url
+        product.price = 23000  # 기본 추천 가격 미리 세팅 (0원 방지)
         db.commit()
 
         return BaseResponse(
