@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile, Body, Depends
+from fastapi import APIRouter, File, UploadFile, Depends
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
@@ -66,7 +66,7 @@ async def classify_product(
 
 @router.post("/image", response_model=BaseResponse[dict])
 async def upload_product_images(
-    product_id: int = Body(...),
+    product_id: int,
     images: List[UploadFile] = File(...),
     db: Session = Depends(get_db)
 ):
@@ -104,7 +104,7 @@ async def upload_product_images(
 
 @router.post("/text", response_model=BaseResponse[GeneratedAdText])
 async def create_sale_text(
-    product_id: int = Body(...),
+    product_id: int,
     voices: List[UploadFile] = File(...),
     db: Session = Depends(get_db)
 ):
