@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile, Depends
+from fastapi import APIRouter, File, UploadFile, Depends, Request
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
@@ -207,35 +207,42 @@ async def recommend_price(
         content=PriceRecommendResponse(product_id=req.product_id, recommended_price=FIXED_PRICE)
     )
 
+from app.common.utils import get_base64_encoded_file
+
 @router.get("/salead", response_model=BaseResponse[SaleAdDetail])
 async def get_sale_detail(
     product_id: int,
     db: Session = Depends(get_db)
 ):
     """
-    5단계: 판매 글 상세 조회
+    5단계: 판매 글 상세 조회 (실제 데이터 및 Base64 이미지/음성)
     """
     product = db.query(Product).filter(Product.product_id == product_id).first()
     if not product:
-        return BaseResponse(isSuccess=False, content=None)
+        return BaseResponse(isSuccess=False, message="상품을 찾을 수 없습니다.", content=None)
 
     # 이미지 JOIN
     prod_img = db.query(ProductImage).filter(ProductImage.product_id == product_id).first()
-    image_list = []
+    image_data_list = []
+    
     if prod_img:
-        if prod_img.img1: image_list.append(prod_img.img1)
-        if prod_img.img2: image_list.append(prod_img.img2)
-        if prod_img.img3: image_list.append(prod_img.img3)
-        if prod_img.img4: image_list.append(prod_img.img4)
+        for img_path in [prod_img.img1, prod_img.img2, prod_img.img3, prod_img.img4]:
+            if img_path:
+                encoded = get_base64_encoded_file(img_path)
+                if encoded: image_data_list.append(encoded)
+
+    voice_data = ""
+    if product.voice_path:
+        voice_data = get_base64_encoded_file(product.voice_path)
 
     return BaseResponse(
         isSuccess=True,
         content=SaleAdDetail(
             product_id=product.product_id,
             title=product.title or "제목 없음",
-            price=product.price or 0,
-            images=image_list or ["/static/images/sample.jpg"],
-            voice_url=product.voice_path or "",
+            price=product.price or 0, # 여기 0이 나오는 이유는 아직 4단계(가격 추천)를 안 거쳤기 때문일 수 있습니다.
+            images=image_data_list,
+            voice_url=voice_data,
             final_description=product.final_description or ""
         )
     )
