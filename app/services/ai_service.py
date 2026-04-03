@@ -50,8 +50,10 @@ class AIService:
                 f"4. 맛의 특징: {taste}\n"
                 f"5. 농부의 한마디: {message}\n\n"
                 f"### 작성 가이드:\n"
-                f"- 제목은 반드시 '[품종] [무게]' 형식을 포함해야 해. (예: 제주 감귤 5kg, 산지 직송 햇사과 10kg)\n"
-                f"- 내용은 수확일과 맛의 특징을 강조하며, 농부의 진심이 느껴지도록 작성해줘.\n\n"
+                f"- 제목은 반드시 '[품종] [무게]' 형식을 포함해야 하며, 20자 이내로 짧고 강렬하게 작성해.\n"
+                f"- **상세 내용**: 인사말이나 서론('안녕하세요' 등)은 완전히 생략하고, 바로 상품의 특징을 3~5문장 내외로 간결하게 설명해.\n"
+                f"- 수확 정보와 맛의 특징만 담은 담백하고 신뢰감 있는 문체를 사용해.\n"
+                f"- **중요**: 서론이나 인사말 없이 바로 '제목:'과 '내용:' 항목만 출력해.\n\n"
                 f"제목: [여기에 제목]\n"
                 f"내용: [여기에 상세 내용]"
             )
@@ -60,12 +62,19 @@ class AIService:
                 contents=prompt
             )
             full_text = response.text.strip()
+            
+            # 기본값 설정
             title = f"제주 {category} {weight}"
             description = full_text
+            
             if "제목:" in full_text and "내용:" in full_text:
                 parts = full_text.split("내용:")
                 title = parts[0].replace("제목:", "").strip()
+                # 제목이 너무 길면 자름 (DB 에러 방지)
+                if len(title) > 50:
+                    title = title[:47] + "..."
                 description = parts[1].strip()
+            
             return title, description
         except Exception as e:
             return f"제주 {category} {weight}", "맛있는 농산물입니다."

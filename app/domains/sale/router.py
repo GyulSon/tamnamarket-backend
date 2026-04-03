@@ -165,8 +165,8 @@ async def create_sale_text(
 
         print(f"✅ [완료] 제목 생성 결과: {title}")
 
-        # [3] DB 업데이트
-        product.title = title
+        # [3] DB 업데이트 (DB 에러 방지를 위해 최종 텍스트 길이 제한)
+        product.title = title[:250] if title else f"제주 {category} 상품"
         product.final_description = description
         product.voice_path = voice_url
         db.commit()
